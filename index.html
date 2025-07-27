@@ -23,6 +23,24 @@
             justify-content: center;
         }
 
+        /* Скрываем скроллбары */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        ::-webkit-scrollbar-track {
+            display: none;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            display: none;
+        }
+        
+        html {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+        }
+
         /* Эффект старой плёнки */
         body::before {
             content: '';
@@ -75,6 +93,58 @@
             }
         }
 
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            opacity: 0;
+            transform: scale(0.5) rotate(-10deg);
+            animation: logoAppear 1.5s ease-out 2s forwards;
+            z-index: 10;
+            position: relative;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo.flying {
+            position: fixed !important;
+            margin: 0 !important;
+            animation: none !important;
+            transition: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
+
+        @keyframes logoAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(-10deg);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.1) rotate(5deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+
+
         /* Частицы пыли */
         .dust-particle {
             position: absolute;
@@ -108,78 +178,131 @@
                 font-size: 2.5rem;
                 padding: 0 20px;
             }
+            .logo {
+                width: 60px;
+                height: 60px;
+            }
         }
 
         @media (max-width: 480px) {
             .title {
                 font-size: 2rem;
             }
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="screen-flicker"></div>
-    <h1 class="title">mirdims</h1>
+    <div class="content-container">
+        <img src="logo.png" alt="mirdims logo" class="logo">
+        <h1 class="title">mirdims</h1>
+    </div>
+    
+
 
     <script>
-        // Создание частиц пыли
+        // Оптимизированная система частиц
+        let particles = [];
+        let particleContainer = null;
+        
         function createDustParticle() {
-            const particle = document.createElement('div');
-            particle.className = 'dust-particle';
+            const particle = {
+                element: document.createElement('div'),
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                speedX: (Math.random() - 0.5) * 2,
+                speedY: (Math.random() - 0.5) * 2,
+                size: Math.random() * 3 + 1,
+                opacity: Math.random() * 0.8 + 0.2,
+                life: Math.random() * 10000 + 5000,
+                createdAt: Date.now()
+            };
             
-            // Случайный размер
-            const size = Math.random() * 3 + 1;
-            particle.style.width = size + 'px';
-            particle.style.height = size + 'px';
+            particle.element.className = 'dust-particle';
+            particle.element.style.width = particle.size + 'px';
+            particle.element.style.height = particle.size + 'px';
+            particle.element.style.left = particle.x + 'px';
+            particle.element.style.top = particle.y + 'px';
+            particle.element.style.opacity = particle.opacity;
             
-            // Случайная позиция
-            particle.style.left = Math.random() * window.innerWidth + 'px';
-            particle.style.top = Math.random() * window.innerHeight + 'px';
+            if (!particleContainer) {
+                particleContainer = document.createElement('div');
+                particleContainer.style.position = 'fixed';
+                particleContainer.style.top = '0';
+                particleContainer.style.left = '0';
+                particleContainer.style.width = '100%';
+                particleContainer.style.height = '100%';
+                particleContainer.style.pointerEvents = 'none';
+                particleContainer.style.zIndex = '3';
+                document.body.appendChild(particleContainer);
+            }
             
-            // Случайная прозрачность
-            particle.style.opacity = Math.random() * 0.8 + 0.2;
+            particleContainer.appendChild(particle.element);
+            particles.push(particle);
             
-            document.body.appendChild(particle);
+            // Ограничиваем количество частиц
+            if (particles.length > 30) {
+                const oldParticle = particles.shift();
+                if (oldParticle.element.parentNode) {
+                    oldParticle.element.parentNode.removeChild(oldParticle.element);
+                }
+            }
+        }
+        
+        function animateAllParticles() {
+            const now = Date.now();
             
-            // Анимация движения
-            let x = parseFloat(particle.style.left);
-            let y = parseFloat(particle.style.top);
-            let speedX = (Math.random() - 0.5) * 2;
-            let speedY = (Math.random() - 0.5) * 2;
-            
-            function animateParticle() {
-                x += speedX;
-                y += speedY;
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const particle = particles[i];
+                
+                // Удаляем старые частицы
+                if (now - particle.createdAt > particle.life) {
+                    if (particle.element.parentNode) {
+                        particle.element.parentNode.removeChild(particle.element);
+                    }
+                    particles.splice(i, 1);
+                    continue;
+                }
+                
+                // Обновляем позицию
+                particle.x += particle.speedX;
+                particle.y += particle.speedY;
                 
                 // Отражение от краёв
-                if (x <= 0 || x >= window.innerWidth) speedX *= -1;
-                if (y <= 0 || y >= window.innerHeight) speedY *= -1;
+                if (particle.x <= 0 || particle.x >= window.innerWidth) {
+                    particle.speedX *= -1;
+                    particle.x = Math.max(0, Math.min(window.innerWidth, particle.x));
+                }
+                if (particle.y <= 0 || particle.y >= window.innerHeight) {
+                    particle.speedY *= -1;
+                    particle.y = Math.max(0, Math.min(window.innerHeight, particle.y));
+                }
                 
-                particle.style.left = x + 'px';
-                particle.style.top = y + 'px';
+                // Применяем позицию
+                particle.element.style.left = particle.x + 'px';
+                particle.element.style.top = particle.y + 'px';
                 
                 // Случайное изменение прозрачности
                 if (Math.random() < 0.01) {
-                    particle.style.opacity = Math.random() * 0.8 + 0.2;
+                    particle.opacity = Math.random() * 0.8 + 0.2;
+                    particle.element.style.opacity = particle.opacity;
                 }
             }
-            
-            setInterval(animateParticle, 50);
-            
-            // Удаление частицы через время
-            setTimeout(() => {
-                if (particle.parentNode) {
-                    particle.parentNode.removeChild(particle);
-                }
-            }, Math.random() * 10000 + 5000);
         }
         
-        // Создание частиц каждые 200мс
-        setInterval(createDustParticle, 200);
+        // Создание частиц каждые 200мс (только когда логотип не летает)
+        let dustInterval = setInterval(createDustParticle, 200);
+        
+        // Единая анимация всех частиц
+        setInterval(animateAllParticles, 50);
         
         // Создание начальных частиц
-        for (let i = 0; i < 20; i++) {
-            setTimeout(createDustParticle, i * 100);
+        for (let i = 0; i < 15; i++) {
+            setTimeout(createDustParticle, i * 150);
         }
         
         // Эффект мерцания экрана (случайно)
@@ -192,6 +315,98 @@
                 }, 1000);
             }
         }, 3000);
+        
+        // Интерактивный логотип
+        let logoFlying = false;
+        let logoX = 0, logoY = 0;
+        let logoSpeedX = 0, logoSpeedY = 0;
+        
+        function startLogoFlight() {
+            if (logoFlying) return;
+            
+            const logo = document.querySelector('.logo');
+            const rect = logo.getBoundingClientRect();
+            
+            logoFlying = true;
+            logo.classList.add('flying');
+            
+            // Останавливаем фоновые частицы для производительности
+            clearInterval(dustInterval);
+            
+            // Останавливаем мерцание экрана
+            const flicker = document.querySelector('.screen-flicker');
+            flicker.style.animation = 'none';
+            
+            // Начальная позиция
+            logoX = rect.left;
+            logoY = rect.top;
+            
+            // Применяем начальную позицию сразу
+            logo.style.left = logoX + 'px';
+            logo.style.top = logoY + 'px';
+            
+            // Случайное направление полёта
+            logoSpeedX = (Math.random() - 0.5) * 8 + 2;
+            logoSpeedY = (Math.random() - 0.5) * 8 - 2;
+            
+            // Создаём частицы при запуске (меньше для производительности)
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    createDustParticle();
+                }, i * 150);
+            }
+            
+            animateLogo();
+        }
+        
+        function animateLogo() {
+            if (!logoFlying) return;
+            
+            const logo = document.querySelector('.logo');
+            
+            // Обновляем позицию
+            logoX += logoSpeedX;
+            logoY += logoSpeedY;
+            
+            // Проверяем столкновения со стенами
+            if (logoX <= 0 || logoX >= window.innerWidth - 80) {
+                logoSpeedX *= -1;
+                logoX = Math.max(0, Math.min(window.innerWidth - 80, logoX));
+                
+                // Создаём частицы при ударе (меньше для производительности)
+                for (let i = 0; i < 2; i++) {
+                    setTimeout(() => createDustParticle(), i * 100);
+                }
+            }
+            
+            if (logoY <= 0 || logoY >= window.innerHeight - 80) {
+                logoSpeedY *= -1;
+                logoY = Math.max(0, Math.min(window.innerHeight - 80, logoY));
+                
+                // Создаём частицы при ударе (меньше для производительности)
+                for (let i = 0; i < 2; i++) {
+                    setTimeout(() => createDustParticle(), i * 100);
+                }
+            }
+            
+            // Применяем позицию (без вращения для производительности)
+            logo.style.left = logoX + 'px';
+            logo.style.top = logoY + 'px';
+            
+            // Убеждаемся что логотип видим
+            logo.style.opacity = '1';
+            
+            requestAnimationFrame(animateLogo);
+        }
+        
+        // Обработчики событий для логотипа
+        document.querySelector('.logo').addEventListener('click', startLogoFlight);
+        document.querySelector('.logo').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startLogoFlight();
+        });
+        
+
         
         // Реакция на касание (для мобильных)
         let touchStartY = 0;
