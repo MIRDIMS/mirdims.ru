@@ -84,6 +84,13 @@
             z-index: 10;
             position: relative;
             letter-spacing: 0.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .title:hover {
+            text-shadow: 0 0 30px rgba(255,255,255,1);
+            transform: translateY(50px) scale(1.05);
         }
 
         @keyframes fadeInUp {
@@ -96,19 +103,27 @@
         .logo {
             width: 80px;
             height: 80px;
-            margin: 0 auto 20px;
             opacity: 0;
             transform: scale(0.5) rotate(-10deg);
             animation: logoAppear 1.5s ease-out 2s forwards;
             z-index: 10;
-            position: relative;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
             filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
             cursor: pointer;
             transition: transform 0.1s ease;
         }
 
+        .logo-placeholder {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+        }
+
         .logo:hover {
-            transform: scale(1.05);
+            transform: translate(-50%, -50%) scale(1.05);
         }
 
         .logo.flying {
@@ -118,20 +133,21 @@
             transition: none !important;
             opacity: 1 !important;
             transform: none !important;
+            z-index: 100 !important; /* Убеждаемся что логотип поверх всего */
         }
 
         @keyframes logoAppear {
             0% {
                 opacity: 0;
-                transform: scale(0.5) rotate(-10deg);
+                transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
             }
             50% {
                 opacity: 0.8;
-                transform: scale(1.1) rotate(5deg);
+                transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
             }
             100% {
                 opacity: 1;
-                transform: scale(1) rotate(0deg);
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
             }
         }
 
@@ -141,6 +157,105 @@
             align-items: center;
             justify-content: center;
             text-align: center;
+            min-height: 100px; /* Фиксированная высота для стабильности */
+        }
+
+        /* Стили для Telegram диалога */
+        .telegram-dialog {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+        }
+
+        .telegram-dialog.show {
+            display: flex;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .telegram-question {
+            color: #888;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .telegram-btn {
+            padding: 12px 30px;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: transparent;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            backdrop-filter: blur(5px);
+            min-width: 120px; /* Фиксированная минимальная ширина */
+            width: 120px; /* Фиксированная ширина */
+            height: 50px; /* Фиксированная высота */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .telegram-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .telegram-btn:hover::before {
+            left: 100%;
+        }
+
+        .telegram-btn:hover {
+            border-color: rgba(255,255,255,0.8);
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .telegram-btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-yes {
+            border-color: rgba(0, 255, 0, 0.5);
+        }
+
+        .btn-yes:hover {
+            border-color: rgba(0, 255, 0, 0.8);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .btn-no {
+            border-color: rgba(255, 0, 0, 0.5);
+        }
+
+        .btn-no:hover {
+            border-color: rgba(255, 0, 0, 0.8);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
         }
 
 
@@ -182,6 +297,10 @@
                 width: 60px;
                 height: 60px;
             }
+            .logo-placeholder {
+                width: 60px;
+                height: 60px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -192,15 +311,43 @@
                 width: 50px;
                 height: 50px;
             }
+            .logo-placeholder {
+                width: 50px;
+                height: 50px;
+            }
+            .telegram-question {
+                font-size: 1rem;
+                margin-bottom: 20px;
+            }
+            .button-container {
+                gap: 15px;
+            }
+            .telegram-btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+                min-width: 100px;
+                width: 100px;
+                height: 45px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="screen-flicker"></div>
     <div class="content-container">
-        <img src="logo.png" alt="mirdims logo" class="logo">
-        <h1 class="title">mirdims</h1>
+        <div class="logo-placeholder"></div>
+        <h1 class="title" id="title">mirdims</h1>
+        
+        <!-- Telegram диалог -->
+        <div class="telegram-dialog" id="telegramDialog">
+            <div class="telegram-question">Хотите перейти в телеграм?</div>
+            <div class="button-container">
+                <button class="telegram-btn btn-yes" id="btnYes">Да</button>
+                <button class="telegram-btn btn-no" id="btnNo">Нет</button>
+            </div>
+        </div>
     </div>
+    <img src="logo.png" alt="mirdims logo" class="logo">
     
 
 
@@ -405,6 +552,60 @@
             e.preventDefault();
             startLogoFlight();
         });
+
+        // Обработчики для Telegram диалога
+        const title = document.getElementById('title');
+        const telegramDialog = document.getElementById('telegramDialog');
+        const btnYes = document.getElementById('btnYes');
+        const btnNo = document.getElementById('btnNo');
+
+        // Клик по надписи mirdims
+        title.addEventListener('click', showTelegramDialog);
+        title.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            showTelegramDialog();
+        });
+
+        function showTelegramDialog() {
+            // Скрываем надпись
+            title.style.opacity = '0';
+            title.style.transform = 'scale(0.8)';
+            
+            setTimeout(() => {
+                title.style.display = 'none';
+                // Показываем диалог
+                telegramDialog.classList.add('show');
+            }, 300);
+        }
+
+        // Обработчик кнопки "Да"
+        btnYes.addEventListener('click', () => {
+            window.open('https://t.me/mirdims', '_blank');
+        });
+
+        btnYes.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            window.open('https://t.me/mirdims', '_blank');
+        });
+
+        // Обработчик кнопки "Нет"
+        btnNo.addEventListener('click', hideTelegramDialog);
+        btnNo.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            hideTelegramDialog();
+        });
+
+        function hideTelegramDialog() {
+            // Скрываем диалог
+            telegramDialog.classList.remove('show');
+            
+            setTimeout(() => {
+                // Показываем надпись обратно
+                title.style.display = 'block';
+                title.style.opacity = '1';
+                title.style.transform = 'scale(1)';
+            }, 300);
+        }
         
 
         
