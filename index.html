@@ -3,43 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mirdims — Добро пожаловать!</title>
+    <title>mirdims — Старая плёнка</title>
     <style>
-        body {
-            background: linear-gradient(120deg, #4CAF50 0%, #2196F3 100%);
-            color: #fff;
-            font-family: 'Segoe UI', Arial, sans-serif;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            position: relative;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
-        h1 {
-            font-size: 3em;
-            margin-bottom: 0.3em;
-            text-shadow: 2px 2px 8px #0005;
-        }
-        p {
-            font-size: 1.5em;
-            margin-bottom: 2em;
-        }
-        .footer {
+
+        /* Эффект старой плёнки */
+        body::before {
+            content: '';
             position: fixed;
-            bottom: 10px;
+            top: 0;
             left: 0;
-            width: 100vw;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, transparent 0%, rgba(255,255,255,0.03) 1%, transparent 2%),
+                radial-gradient(circle at 80% 20%, transparent 0%, rgba(255,255,255,0.02) 1%, transparent 2%),
+                radial-gradient(circle at 40% 80%, transparent 0%, rgba(255,255,255,0.01) 1%, transparent 2%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Царапины на плёнке */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, transparent 98%, rgba(255,255,255,0.1) 98.5%, transparent 99%),
+                linear-gradient(180deg, transparent 95%, rgba(255,255,255,0.05) 95.5%, transparent 96%),
+                linear-gradient(45deg, transparent 97%, rgba(255,255,255,0.03) 97.5%, transparent 98%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .title {
+            font-size: 3.5rem;
+            font-weight: bold;
             text-align: center;
-            color: #fff9;
-            font-size: 1em;
+            text-shadow: 0 0 20px rgba(255,255,255,0.8);
+            opacity: 0;
+            transform: translateY(50px);
+            animation: fadeInUp 2s ease-out forwards;
+            z-index: 10;
+            position: relative;
+            letter-spacing: 0.2em;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Частицы пыли */
+        .dust-particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* Мерцание экрана */
+        .screen-flicker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            pointer-events: none;
+            z-index: 4;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        /* Адаптивность для мобильных */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+                padding: 0 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>mirdims</h1>
-    <p>Добро пожаловать на сайт!<br>Скоро здесь появится что-то интересное.</p>
-    <div class="footer">&copy; mirdims.ru | 2025</div>
+    <div class="screen-flicker"></div>
+    <h1 class="title">mirdims</h1>
+
+    <script>
+        // Создание частиц пыли
+        function createDustParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'dust-particle';
+            
+            // Случайный размер
+            const size = Math.random() * 3 + 1;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            
+            // Случайная позиция
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            particle.style.top = Math.random() * window.innerHeight + 'px';
+            
+            // Случайная прозрачность
+            particle.style.opacity = Math.random() * 0.8 + 0.2;
+            
+            document.body.appendChild(particle);
+            
+            // Анимация движения
+            let x = parseFloat(particle.style.left);
+            let y = parseFloat(particle.style.top);
+            let speedX = (Math.random() - 0.5) * 2;
+            let speedY = (Math.random() - 0.5) * 2;
+            
+            function animateParticle() {
+                x += speedX;
+                y += speedY;
+                
+                // Отражение от краёв
+                if (x <= 0 || x >= window.innerWidth) speedX *= -1;
+                if (y <= 0 || y >= window.innerHeight) speedY *= -1;
+                
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                
+                // Случайное изменение прозрачности
+                if (Math.random() < 0.01) {
+                    particle.style.opacity = Math.random() * 0.8 + 0.2;
+                }
+            }
+            
+            setInterval(animateParticle, 50);
+            
+            // Удаление частицы через время
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, Math.random() * 10000 + 5000);
+        }
+        
+        // Создание частиц каждые 200мс
+        setInterval(createDustParticle, 200);
+        
+        // Создание начальных частиц
+        for (let i = 0; i < 20; i++) {
+            setTimeout(createDustParticle, i * 100);
+        }
+        
+        // Эффект мерцания экрана (случайно)
+        setInterval(() => {
+            const flicker = document.querySelector('.screen-flicker');
+            if (Math.random() < 0.1) {
+                flicker.style.animation = 'flicker 0.1s infinite';
+                setTimeout(() => {
+                    flicker.style.animation = 'flicker 0.15s infinite';
+                }, 1000);
+            }
+        }, 3000);
+        
+        // Реакция на касание (для мобильных)
+        let touchStartY = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            const diff = touchStartY - touchY;
+            
+            // Создание дополнительных частиц при скролле
+            if (Math.abs(diff) > 10) {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(createDustParticle, i * 50);
+                }
+            }
+        });
+    </script>
 </body>
-</html>
+</html> 
