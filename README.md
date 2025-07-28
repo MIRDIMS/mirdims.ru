@@ -1,6 +1,6 @@
 ## 📊 Статистика нашего "простого" лендинга:
 
-<img width="1080" height="1920" alt="mirdims_scr" src="https://github.com/user-attachments/assets/0916b194-6b5b-4244-965f-9a981094435e" />
+<img width="360" height="640" alt="mirdims_scr" src="https://github.com/user-attachments/assets/0916b194-6b5b-4244-965f-9a981094435e" />
 
 🔢 600+ строк кода для приветственной страницы:
 
